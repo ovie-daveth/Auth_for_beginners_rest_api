@@ -1,0 +1,44 @@
+header{
+  background-color: #eee;
+  color: black;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: .4rem 3rem;
+}
+@media screen and (max-width: 650px) {
+  header{
+    padding: .4rem 1rem;
+  }
+}
+.nav_bar{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo>small{
+  margin-top: -10px;
+  font-size: 12px;
+  color: brown;
+  font-weight: 600;
+}
+.logo h1{
+  margin-bottom: -5px;
+}
+.menus ul li{
+  display: inline-block;
+  margin-left: 10px;
+  padding: 0.2rem .4rem;
+  border: 1px solid grey;
+  transition:  background-color .4s ease-in-out;
+
+}
+.menus ul li:hover{
+  background-color: grey;
+}
+.menus ul li:hover a{
+  color: #fff;
+}
+.menus ul li a{
+  color: grey;
+  font-size: 15px;
+}

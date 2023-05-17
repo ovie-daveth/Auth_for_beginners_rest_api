@@ -1,23 +1,27 @@
 const validator = require('validator')
 const mongoose = require('mongoose')
 const User = require('../models/userModel')
+const createToken = require("../token")
 
 const regsiterUsers = async (req, res) => {
     const { email, password, name } = req.body
     if(!email || !password || !name) {
         res.status(401).json({error: 'Invalid email or password'});
     } else if (!validator.isEmail(email)) {
-        res.status(400).json({ error: 'Invalid email address' });
+       return res.status(400).json({ error: 'Invalid email address' });
     } else if (!validator.isStrongPassword(password)) {
-        res.status(400).json({ error: 'Invalid password, must contain a special char and six min digit' });
+      return  res.status(400).json({ error: 'Invalid password, must contain a special char and six min digit' });
     } 
     try {
         const exist = await User.findOne({email})
     if(exist){
-        res.status(400).json({ error: 'email already exist' });
+        return res.status(400).json({ error: 'Email already exists' });
     } else {
         const user = await User.create({ email, password, name });
-        res.status(201).json({success: "Registered succesfully", user});
+        const token = await createToken(res, user._id);
+        //res.cookie('token', token, { httpOnly: true, maxAge: 3 * 24 * 60 * 60 * 1000 });
+
+       return res.status(201).json({success: "Registered succesfully", user});
     }
     } catch (error) {
         console.error(error);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from "axios"
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [data, setData] = useState({
@@ -34,6 +35,7 @@ const Register = () => {
     },
   ];
 
+  const nav = useNavigate()
   const next = async (e) => {
     e.preventDefault();
     if (currentIndex === inputs.length - 1) {  // this checks for the last field eg inputs.length === 3, hence 3-1 == 2 which is how arrays are indexed
@@ -47,6 +49,7 @@ const Register = () => {
         if (res.success) {
           toast.success(res.success);
           console.log('Form submitted:', res.user);
+          nav("/")
         }
       } catch (error) {
         if (error.response) {
@@ -67,6 +70,13 @@ const Register = () => {
     }
   };
 
+  const back = (e) => {
+    e.preventDefault();
+    setCurrentIndex(currentIndex - 1);
+    setError('');
+  };
+  
+
   const inputChange = (id, value) => {
     const updatedData = { ...data, [inputs[id - 1].name]: value }; // we set the input.name to its value
     setData(updatedData);
@@ -84,7 +94,7 @@ const Register = () => {
             //style={{ display: index === currentIndex ? 'flex' : 'none' }}
             className={`${index === currentIndex ? "flex items-start justify-between" : "hidden"}`}
           >
-           <div className="flex flex-col ">
+           <div className="flex flex-col gap-3">
            <input
               type={item.type}
               placeholder={`Enter your ${item.name}`}
@@ -92,9 +102,13 @@ const Register = () => {
               onChange={(e) => inputChange(item.id, e.target.value)}
               className='bg-indigo-300 text-white font-semibold px-2 py-2 placeholder:text-white placeholder:font-semibold'
             />
+            {currentIndex > 0 && (
+            <button onClick={back} className='bg-indigo-600 py-2 px-5 text-white font-semibold rounded-sm hover:bg-red-500 active:bg-indigo-600'>Back</button>
+            )}
             {error && index === currentIndex && <p className='text-red-600 italic font-bold'>{error}</p>}
            </div>
             <button onClick={next} className='ml-6 bg-indigo-600 py-2 px-5 text-white font-semibold rounded-sm hover:bg-red-500 active:bg-indigo-600'>Next</button>
+            
           </div>
         ))}
       </form>

@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require("dotenv").config();
 const route = require('./routes/userRoutes')
+const mongoose = require('mongoose');
 
 // initialize the express app
 const app = express();
@@ -9,6 +10,12 @@ const app = express();
 //middlewares
 app.use(express.json()); // allows the readiin of json requests
 app.use(cors()); // prevent the cross origin errors that occur when passin request between different ip adddres
+
+//mongodb connection
+const uri = process.env.MONGODB_URI
+mongoose.connect(uri).then(()=> {
+    console.log('mongodb connected');
+}).catch((err)=> console.log(`error connecting withmongodb: ${err}`));
 
 // route middleware
 app.use('/', route);

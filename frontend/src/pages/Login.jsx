@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import axios from "axios"
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useLoginMutation } from '../slice/userApiSlice';
+import { setCredentials } from '../slice/authSlice';
 
 const Login = () => {
   const [data, setData] = useState({
@@ -27,6 +30,8 @@ const Login = () => {
       name: 'password',
     },
   ];
+  const dispatch = useDispatch()
+  const [ login ] = useLoginMutation()
 
   const nav = useNavigate()
   const next = async (e) => {
@@ -36,22 +41,37 @@ const Login = () => {
         setError('Please fill in all fields');
         return;
       }
+      // try {
+      //   const response = await axios.post("/login", { email, password });
+      //   const res = response.data;
+      //   if (res.success) {
+      //     toast.success(res.success);
+      //     console.log('Logged in:', res.user);
+      //     nav("/")
+      //   }
+      // } catch (error) {
+      //   if (error.response) {
+      //     const errorMessage = error.response.data.error; //i used this because inmy server i spcified statuscode 404  which is a server error. so I am passing the server error into my client
+      //     toast.error(errorMessage);
+      //   } else {
+      //     console.error('Form submission error:', error); //normal clint error
+      //     toast.error(error)
+      //   }
+      // }
       try {
-        const response = await axios.post("/login", { email, password });
-        const res = response.data;
-        if (res.success) {
-          toast.success(res.success);
-          console.log('Logged in:', res.user);
-          nav("/")
-        }
-      } catch (error) {
-        if (error.response) {
-          const errorMessage = error.response.data.error; //i used this because inmy server i spcified statuscode 404  which is a server error. so I am passing the server error into my client
+        const res = await login({ email, password }).unwrap();
+        dispatch(setCredentials({ ...res }));
+        console.log(res.user)
+        if (res.error) {
+          const errorMessage = res.error; //i used this because inmy server i spcified statuscode 404  which is a server error. so I am passing the server error into my client
           toast.error(errorMessage);
-        } else {
-          console.error('Form submission error:', error); //normal clint error
-          toast.error(error)
+        } else if(res.success) {
+          nav("/")
+          toast.success(res.success)
         }
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+        console.log(err?.data?.message || err.error)
       }
     } else {
       if (!data[inputs[currentIndex].name]) { //checks if there is data in a particular input field, if no, throw an error. data.[] is how we index an array/object. inputs[currentIndex].name is the name of the attricbute of the cuurent input field tat could be === "email", "name" or "password". so in essence we are simply looping with if ie if !data[email] or !data[name] or !data[password] then do this.

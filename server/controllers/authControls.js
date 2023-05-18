@@ -8,16 +8,16 @@ const regsiterUsers = async (req, res) => {
     const { email, password, name } = req.body // received from client
     // console.log("The password", password) used this for debugging
     if(!email || !password || !name) {
-        res.status(401).json({error: 'Invalid email or password'});
+        res.json({error: 'Invalid email or password'});
     } else if (!validator.isEmail(email)) {
-       return res.status(400).json({ error: 'Invalid email address' });
+       return res.json({ error: 'Invalid email address' });
     } else if (!validator.isStrongPassword(password)) {
-      return  res.status(400).json({ error: 'Invalid password, must contain a special char and six min digit' });
+      return  res.json({ error: 'Invalid password, must contain a special char and six min digit' });
     } 
     try {
         const exist = await User.findOne({email}) // a mongodb method to check if email exist
     if(exist){
-        return res.status(400).json({ error: 'Email already exists' });
+        return res.json({ error: 'Email already exists' });
     } else {
         const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with a salt round of 10
         const user = await User.create({ email, password: hashedPassword, name }); 
@@ -27,7 +27,7 @@ const regsiterUsers = async (req, res) => {
     }
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.json({ error: 'Internal server error' });
     }
    
 }
@@ -51,7 +51,7 @@ const loginUsers = async (req, res) => {
         // Password is valid, proceed with login
         // Generate and send the token
         await createToken(res, user._id);
-        return res.json({ success: true, message: 'Logged in successfully' });
+        return res.json({ success: 'Logged in successfully' });
       } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -81,21 +81,25 @@ const getUser = async (req, res) => {
       };
     
       console.log(user);
-      res.status(200).json(user);
+      res.status(200).json({sucess: 'Updated successfully', user});
   };
   
 
 const updateUsers = async (req, res) => {
     const user = await User.findById(req.user._id);
     if(user){
-        //get me the user for an edit, if no edit save it again
-        user.name = req.body.name || user.name;
-        user.email = req.body.email || user.email;
-        user.location = req.body.location || user.location;
-        user.gender = req.body.gender || user.gender;
-
-        const updatedUser = await user.save()
-        res.status(200).json(updatedUser)
+      try {
+          //get me the user for an edit, if no edit save it again
+          user.name = req.body.name || user.name;
+          user.email = req.body.email || user.email;
+          user.location = req.body.location || user.location;
+          user.gender = req.body.gender || user.gender;
+  
+          const updatedUser = await user.save()
+          res.status(200).json(updatedUser)
+      } catch (error) {
+        res.json({ error: "restricted"})
+      }
     } else{
         res.status(404).json({error: 'User not found'})
     }
